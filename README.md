@@ -1,2 +1,2 @@
 # autosave_gd
-Backup files and directory to Google Drive securely
+Backup files and directories to Google Drive securely
