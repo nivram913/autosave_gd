@@ -168,7 +168,14 @@ backup()
 				cd "$GD_DIR"
 				
 				PRETTY_NAME="$(echo "$fic" | tr '/' '.')"
-				REMOTE_NAME="$date-$host-$PRETTY_NAME.tgz.enc"
+				# In case of forcing the backup operation, upload a full "base" backup
+				if test "$FORCE" = "1"
+				then
+					REMOTE_NAME="base-$date-$host-$PRETTY_NAME.tgz.enc"
+					rm -f "$AS_DIR/$PRETTY_NAME"
+				else
+					REMOTE_NAME="$date-$host-$PRETTY_NAME.tgz.enc"
+				fi
 				
 				# Compress, cipher and upload the backup
 				tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
