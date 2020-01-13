@@ -3,11 +3,14 @@
 GD_DIR="$HOME/gdrive/" # Directory with Google Drive access
 AS_DIR="$HOME/.autosave/" # Directory with autosave_gd working files
 AS_INDEX="$AS_DIR/autosave.index" # autosave_gd index of tracking files
+AS_HOOKS_DIR="$AS_DIR/.autosave/hooks/" # Directory containing hook scripts to be executed before backup task
 AS_PASS='' # Password for symetric encryption (AES-256-CBC in use)
 PBKDF_ITER='100000' # PBKDF2 iteration count (default: 100000, higher = stronger)
 REMOTE_DIR="autosave_p6705fr" # Directory on Google Drive holding backups
 host="p6705fr" # Name of the current host
-date="$(date +%Y%m%d%H%M)" # Current date and time to sort backups
+
+# do NOT edit this
+date="$(date +%Y%m%d%H%M)" # Current date and time to sort backups (do NOT edit this)
 
 # Detect if we run in GUI mode
 GUI=false
@@ -150,6 +153,25 @@ add()
 	fi
 }
 
+# run script hooks in $AS_HOOKS_DIR
+# Return 1 if a script return 1 (backup should be aborted), 0 otherwise
+run_hooks()
+{
+    local script
+    
+    for script in $AS_HOOKS_DIR/*.sh
+    do
+        if test -f "$script" -a -x "$script"
+        then
+            "$script"
+            if (($? == 1))
+            then
+                return 1
+            fi
+        fi
+    done
+}
+
 # upload a backup of files in index file modified since last backup
 backup()
 {
@@ -159,6 +181,18 @@ backup()
 	then
 		notify-send -i info "Backup started" -t 5000
 	fi
+	
+	if ! run_hooks
+	then
+    	if $GUI
+        then
+	        notify-send -i error "Backup aborted (hook returned 1)" -t 300000
+        else
+            echo "Backup aborted (hook returned 1)" > /dev/stderr
+        fi
+        
+        return
+    fi
 	
 	for fic in "${!AS_ENTRIES[@]}"
 	do
