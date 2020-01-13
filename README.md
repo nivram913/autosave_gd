@@ -42,3 +42,11 @@ Usage: autosave_gd.sh [--gui] [-f] <option> [<absolute path to files>]
 
 ## From Thunar
 Right click on files and/or directories you want to backup or untrack, then select the action.
+
+## Restoring backups
+In order to restore backups, you should:
+
+- Create an empty working directory
+- Download backups files (`*.enc`) in that directory
+- Place `restore_as.sh` in that directory and execute it
+- `restore_as.sh` script will prompt for the password and then decrypt and extract backups in that directory

@@ -3,10 +3,10 @@
 GD_DIR="$HOME/gdrive/" # Directory with Google Drive access
 AS_DIR="$HOME/.autosave/" # Directory with autosave_gd working files
 AS_INDEX="$AS_DIR/autosave.index" # autosave_gd index of tracking files
-AS_PASS="" # Password for symetric encryption (AES-256-CBC in use)
-REMOTE_DIR="" # Directory on Google Drive holding backups
-host="" # Name of the current host
-date="$(date +%Y%m%d_%Hh%M)" # Current date and time to sort backups
+AS_PASS='' # Password for symetric encryption (AES-256-CBC in use)
+REMOTE_DIR="autosave_p6705fr" # Directory on Google Drive holding backups
+host="p6705fr" # Name of the current host
+date="$(date +%Y%m%d%H%M)" # Current date and time to sort backups
 
 # Detect if we run in GUI mode
 GUI=false
@@ -168,14 +168,7 @@ backup()
 				cd "$GD_DIR"
 				
 				PRETTY_NAME="$(echo "$fic" | tr '/' '.')"
-				# In case of forcing the backup operation, upload a full "base" backup
-				if test "$FORCE" = "1"
-				then
-					REMOTE_NAME="base-$date-$host-$PRETTY_NAME.tgz.enc"
-					rm -f "$AS_DIR/$PRETTY_NAME"
-				else
-					REMOTE_NAME="$date-$host-$PRETTY_NAME.tgz.enc"
-				fi
+				REMOTE_NAME="$date-$host-$PRETTY_NAME.tgz.enc"
 				
 				# Compress, cipher and upload the backup
 				tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
