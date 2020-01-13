@@ -8,7 +8,7 @@ Backup are compressed and encrypted with AES 256 bits in CBC mode before being u
 
 # Requierements
 - `drive` (https://github.com/odeke-em/drive)
-- `openssl`
+- `openssl >= 1.1.1`
 - `zenity`
 - `gio` utility
 - `thunar` file manager

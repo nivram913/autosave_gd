@@ -4,6 +4,7 @@ GD_DIR="$HOME/gdrive/" # Directory with Google Drive access
 AS_DIR="$HOME/.autosave/" # Directory with autosave_gd working files
 AS_INDEX="$AS_DIR/autosave.index" # autosave_gd index of tracking files
 AS_PASS='' # Password for symetric encryption (AES-256-CBC in use)
+PBKDF_ITER='100000' # PBKDF2 iteration count (default: 100000, higher = stronger)
 REMOTE_DIR="autosave_p6705fr" # Directory on Google Drive holding backups
 host="p6705fr" # Name of the current host
 date="$(date +%Y%m%d%H%M)" # Current date and time to sort backups
@@ -128,7 +129,7 @@ add()
 			fi
 			
 			# Compress, cipher and upload the backup
-			tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
+			tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pbkdf2 -iter "$PBKDF_ITER" -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
 			
 			cd - > /dev/null
 			
@@ -171,7 +172,7 @@ backup()
 				REMOTE_NAME="$date-$host-$PRETTY_NAME.tgz.enc"
 				
 				# Compress, cipher and upload the backup
-				tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
+				tar -zc --listed-incremental="$AS_DIR/$PRETTY_NAME" "$fic" | openssl enc -aes-256-cbc -salt -pbkdf2 -iter "$PBKDF_ITER" -pass pass:"$AS_PASS" | drive push -piped "$REMOTE_DIR/$REMOTE_NAME"
 				
 				cd - > /dev/null
 				AS_ENTRIES["$fic"]="$(date +%s)"

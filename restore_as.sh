@@ -1,10 +1,12 @@
 #! /bin/bash
 
+PBKDF_ITER='100000' # Use same value than during encryption
+
 read -s -p "Decryption password: " pass
 
 for f in *.enc
 do
-    openssl enc -d -aes-256-cbc -salt -in "$f" -out "${f%.enc}" -pass pass:"$pass"
+    openssl enc -d -aes-256-cbc -salt -pbkdf2 -iter "$PBKDF_ITER" -in "$f" -out "${f%.enc}" -pass pass:"$pass"
 done
 
 pass="jhzqvkjhqisuvhiuqshzvdijhbqisjlhvhb"
