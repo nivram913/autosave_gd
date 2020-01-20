@@ -2,7 +2,7 @@
 
 PBKDF_ITER='100000' # Use same value than during encryption
 
-read -s -p "Decryption password: " pass
+read -r -s -p "Decryption password: " pass
 
 for f in *.enc
 do
