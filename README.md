@@ -7,11 +7,14 @@ This tool keep a list of backuped files and directories in order to backup them 
 Backup are compressed and encrypted with AES 256 bits in CBC mode before being uploaded to Google Drive. Only differences are uploaded thanks to `tar --listed-incremental` option.
 
 # Requierements
-- `drive` (https://github.com/odeke-em/drive)
-- `openssl >= 1.1.1`
-- `zenity`
-- `gio` utility
-- `thunar` file manager
+- `drive` (https://github.com/odeke-em/drive) (for Google Drive uploading)
+- `openssl >= 1.1.1` (for encryption)
+- `zenity` command (for GUI)
+- `gio` utility (for emblem on backuped files/directories)
+
+*Optional :*
+
+- `thunar` file manager (for actions from right click on files/directories)
 
 # Install
 This tool was designed to run on **Xubuntu 18.04** but can run on other system as well if dependencies are installed.
@@ -21,16 +24,26 @@ This tool was designed to run on **Xubuntu 18.04** but can run on other system a
 - Create directories configured previously
 - Configure `drive` with `drive init` in the relevant directory (refer to the `drive`'s doc)
 
-*For XFCE*:
-- Place the `emblem-go-up.png` file in the `emblems/` directory of your current theme in `/usr/share/icons/`, then run `gtk-update-icon-cache .` in the root directory of your current theme
+*Emblem functionality setup for XFCE* :
+
+- Place the `emblem-go-up.png` file (or any icon file of your choice) of the `emblems/` directory of your current theme in `/usr/share/icons/`, then run `gtk-update-icon-cache .` in the root directory of your current theme
+
+*Action from right click setup in Thunar* :
+
 - Go in `Edit` -> `Configure custom actions...` in Thunar and add these new entries:
-  - `Name`=`Backup`, `Command`=`autosave_gd.sh --gui --add %F`
-  - `Name`=`Untrack`, `Command`=`autosave_gd.sh --gui --untrack %F`
+- `Name`=`Backup`, `Command`=`autosave_gd.sh --gui --add %F`
+- `Name`=`Untrack`, `Command`=`autosave_gd.sh --gui --untrack %F`
 
 # Usage
-You can mark files with `--add` to be backuped when `autosave_gd.sh` is called with `--backup` argument. `--untrack` is to untrack them.
+You can mark files with `--add` to be backuped.
 
-The `-f` switch serve to force the backup even if there is no change to files.
+When `autosave_gd.sh` is called with `--backup` argument, files listed previously are backuped.
+
+`--untrack` option is for untrack them.
+
+The `-f` switch serve to force the upload of a new *"base"* backup.
+
+The `--gui` flag serve to use `zenity` to display progress and prompt in graphical windows.
 
 ## From the command line
 ```
