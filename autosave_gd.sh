@@ -154,13 +154,13 @@ add()
 	fi
 }
 
-# run script hooks in $AS_HOOKS_DIR
+# run pre-backup script hooks in $AS_HOOKS_DIR
 # Return 1 if a script return 1 (backup should be aborted), 0 otherwise
-run_hooks()
+run_pre_hooks()
 {
     local script
     
-    for script in $AS_HOOKS_DIR/*.sh
+    for script in $AS_HOOKS_DIR/pre_*.sh
     do
         if test -f "$script" -a -x "$script"
         then
@@ -169,6 +169,20 @@ run_hooks()
             then
                 return 1
             fi
+        fi
+    done
+}
+
+# run post-backup script hooks in $AS_HOOKS_DIR
+run_post_hooks()
+{
+    local script
+    
+    for script in $AS_HOOKS_DIR/post_*.sh
+    do
+        if test -f "$script" -a -x "$script"
+        then
+            "$script"
         fi
     done
 }
@@ -183,7 +197,7 @@ backup()
 		notify-send -i info "Backup started" -t 5000
 	fi
 	
-	if ! run_hooks
+	if ! run_pre_hooks
 	then
     	if $GUI
         then
@@ -225,6 +239,8 @@ backup()
 			continue
 		fi
 	done
+	
+	run_post_hooks
 	
 	if $GUI
 	then
