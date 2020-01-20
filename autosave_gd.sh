@@ -21,6 +21,9 @@ then
 	shift
 fi
 
+# make $GUI available for hook scripts
+export GUI
+
 # Detect if we force the backup process
 FORCE="0"
 if test "$1" = "-f"
