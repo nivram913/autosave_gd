@@ -4,8 +4,8 @@ GD_DIR="$HOME/gdrive/" # Directory with Google Drive access
 AS_DIR="$HOME/.autosave/" # Directory with autosave_gd working files
 AS_INDEX="$AS_DIR/autosave.index" # autosave_gd index of tracking files
 AS_HOOKS_DIR="$AS_DIR/hooks/" # Directory containing hook scripts to be executed before backup task
-AS_LAST_BACKUP="$AS_DIR/last_backup"
-AS_PASS='' # Password for symetric encryption (AES-256-CBC in use)
+AS_LAST_BACKUP="$AS_DIR/last_backup" # File containing the date of last successful backup
+AS_PASS='' # Password for symetric encryption (AES-256-CBC in use) / if empty, prompt at execution
 PBKDF_ITER='100000' # PBKDF2 iteration count (default: 100000, higher = stronger)
 REMOTE_DIR="autosave_p6705fr" # Directory on Google Drive holding backups
 host="p6705fr" # Name of the current host
@@ -246,6 +246,28 @@ untrack()
 	fi
 }
 
+# prompt for a password if none set
+prompt_password()
+{
+    if test -z "$AS_PASS"
+    then
+        if $GUI
+        then
+            AS_PASS="$(zenity --password --title='Backup')"
+            if (($? != 0))
+            then
+                return 1
+            fi
+        else
+            read -r -s -p "Enter backup password: " AS_PASS
+            if (($? != 0))
+            then
+                return 1
+            fi
+        fi
+    fi
+}
+
 if (($# == 0))
 then
 	usage "$@"
@@ -273,8 +295,8 @@ else
 	fi
 	
 	case "$1" in
-		--add) shift; add "$@";;
-		--backup) if ! backup; then error=true; else echo "$(date +%Y%m%d)" > "$AS_LAST_BACKUP"; fi ;;
+		--add) shift; if ! prompt_password; then exit 1; fi; add "$@";;
+		--backup) if ! prompt_password; then exit 1; fi; if ! backup; then error=true; else date +%Y%m%d > "$AS_LAST_BACKUP"; fi ;;
 		*) usage "$@"; exit 1;;
 	esac
 fi
