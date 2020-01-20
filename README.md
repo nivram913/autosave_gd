@@ -31,8 +31,8 @@ This tool was designed to run on **Xubuntu 18.04** but can run on other system a
 *Action from right click setup in Thunar* :
 
 - Go in `Edit` -> `Configure custom actions...` in Thunar and add these new entries:
-- `Name`=`Backup`, `Command`=`autosave_gd.sh --gui --add %F`
-- `Name`=`Untrack`, `Command`=`autosave_gd.sh --gui --untrack %F`
+  - `Name`=`Backup`, `Command`=`autosave_gd.sh --gui --add %F`
+  - `Name`=`Untrack`, `Command`=`autosave_gd.sh --gui --untrack %F`
 
 You can setup a keyboard shortcut to execute `autosave_gd.sh --gui --backup` to trigger a backup.
 
