@@ -44,7 +44,7 @@ usage()
 		echo "--untrack  Delete file(s) from the index but keep backup"
 		echo "--backup   Perform a backup of files in the index"
 	fi
-} > /dev/stderr
+} >&2
 
 # check the prensence of Google Drive directory in GD_DIR,
 # access right on the Google account
@@ -137,7 +137,7 @@ add()
 		# Skip already tracked files
 		if test -n "${AS_ENTRIES["$fic"]}"
 		then
-			echo "$fic already tracked ! Skipping..." > /dev/stderr
+			echo "$fic already tracked ! Skipping..." >&2
 			continue
 		fi
 		
@@ -165,7 +165,7 @@ add()
 			AS_ENTRIES["$fic"]="$(date +%s)"
 			gio set "$fic" -t stringv metadata::emblems go-up
 		else
-			echo "$fic doesn't exist ! Skipping..." > /dev/stderr
+			echo "$fic doesn't exist ! Skipping..." >&2
 			continue
 		fi
 		((i++))
@@ -249,7 +249,7 @@ backup()
         then
 	        notify-send -i error "Backup aborted (hook returned 1)" -t 300000
         else
-            echo "Backup aborted (hook returned 1)" > /dev/stderr
+            echo "Backup aborted (hook returned 1)" >&2
         fi
         
         return 1
@@ -286,7 +286,7 @@ backup()
 				report="$report$fic\n"
 			fi
 		else
-			echo "$fic doesn't exist anymore ! Skipping..." > /dev/stderr
+			echo "$fic doesn't exist anymore ! Skipping..." >&2
 			continue
 		fi
 		((i++))
@@ -331,17 +331,9 @@ prompt_password()
     then
         if $GUI
         then
-            AS_PASS="$(zenity --password --title='Backup')"
-            if (($? != 0))
-            then
-                return 1
-            fi
+            AS_PASS="$(zenity --password --title='Backup')" || return 1
         else
-            read -r -s -p "Enter backup password: " AS_PASS
-            if (($? != 0))
-            then
-                return 1
-            fi
+            read -r -s -p "Enter backup password: " AS_PASS || return 1
         fi
     fi
 }
@@ -367,14 +359,14 @@ else
 		then
 			zenity --error --title="Backup" --text="No drive directory at $GD_DIR or no internet connection"
 		else
-			echo "No drive directory at $GD_DIR or no internet connection" > /dev/stderr
+			echo "No drive directory at $GD_DIR or no internet connection" >&2
 		fi
 		exit 1
 	fi
 	
 	case "$1" in
 		--add) shift; if ! prompt_password; then exit 1; fi; add "$@";;
-		--backup) if ! prompt_password; then exit 1; fi; if ! backup; then error=true; else date +%Y%m%d > "$AS_LAST_BACKUP"; fi ;;
+		--backup) if ! prompt_password; then exit 1; fi; if ! backup; then error=true; else date "+%Y%m%d" > "$AS_LAST_BACKUP"; fi ;;
 		*) usage "$@"; exit 1;;
 	esac
 fi
