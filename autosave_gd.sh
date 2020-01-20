@@ -105,9 +105,30 @@ last_modif()
 	echo "$max"
 }
 
+# display a progress bar in GUI mode
+# read from stdin a number between 0 and 100 (percentage done)
+# $1 title
+# $2 text
+progress_bar()
+{
+    if $GUI
+    then
+        zenity --progress --auto-close --no-cancel --title="$1" --text="$2"
+    else
+        cat - > /dev/null
+    fi
+}
+
 # add files in arguments to index file and upload a backup of them
 add()
 {
+    local i="0" len
+    
+    len="$#"
+    mkfifo /tmp/as_progress_ipc
+	progress_bar 'Backup - add' 'Adding files...' < /tmp/as_progress_ipc &
+	exec 3> /tmp/as_progress_ipc
+
 	for fic in "$@"
 	do
 		# Skip already tracked files
@@ -144,7 +165,11 @@ add()
 			echo "$fic doesn't exist ! Skipping..." > /dev/stderr
 			continue
 		fi
-	done
+		((i++))
+		bc <<< "scale=2;$i/$len*100"
+	done >&3
+	exec 3>&-
+	rm -f /tmp/as_progress_ipc
 	
 	if $GUI
 	then
@@ -158,39 +183,57 @@ add()
 # Return 1 if a script return 1 (backup should be aborted), 0 otherwise
 run_pre_hooks()
 {
-    local script
+    local script i="0" len
+    
+    len="$(ls -1 $AS_HOOKS_DIR/pre_*.sh | wc -l)"
+    mkfifo /tmp/as_progress_ipc
+	progress_bar 'Backup - pre hooks' 'Running pre-backup hooks...' < /tmp/as_progress_ipc &
+	exec 3> /tmp/as_progress_ipc
     
     for script in $AS_HOOKS_DIR/pre_*.sh
     do
         if test -f "$script" -a -x "$script"
         then
-            "$script"
+            "$script" > /dev/null
             if (($? == 1))
             then
                 return 1
             fi
         fi
-    done
+        ((i++))
+        bc <<< "scale=2;$i/$len*100"
+    done >&3
+    exec 3>&-
+    rm -f /tmp/as_progress_ipc
 }
 
 # run post-backup script hooks in $AS_HOOKS_DIR
 run_post_hooks()
 {
-    local script
+    local script i="0" len
+    
+    len="$(ls -1 $AS_HOOKS_DIR/post_*.sh | wc -l)"
+    mkfifo /tmp/as_progress_ipc
+	progress_bar 'Backup - post hooks' 'Running post-backup hooks...' < /tmp/as_progress_ipc &
+	exec 3> /tmp/as_progress_ipc
     
     for script in $AS_HOOKS_DIR/post_*.sh
     do
         if test -f "$script" -a -x "$script"
         then
-            "$script"
+            "$script" > /dev/null
         fi
-    done
+        ((i++))
+        bc <<< "scale=2;$i/$len*100"
+    done >&3
+    exec 3>&-
+	rm -f /tmp/as_progress_ipc
 }
 
 # upload a backup of files in index file modified since last backup
 backup()
 {
-	local report=""
+	local report="" i="0" len
 
 	if $GUI
 	then
@@ -208,6 +251,11 @@ backup()
         
         return 1
     fi
+	
+	len="${#AS_ENTRIES[@]}"
+	mkfifo /tmp/as_progress_ipc
+	progress_bar 'Backup' 'Backup in progress...' < /tmp/as_progress_ipc &
+	exec 3> /tmp/as_progress_ipc
 	
 	for fic in "${!AS_ENTRIES[@]}"
 	do
@@ -238,7 +286,11 @@ backup()
 			echo "$fic doesn't exist anymore ! Skipping..." > /dev/stderr
 			continue
 		fi
-	done
+		((i++))
+		bc <<< "scale=2;$i/$len*100"
+	done >&3
+	exec 3>&-
+	rm -f /tmp/as_progress_ipc
 	
 	run_post_hooks
 	
