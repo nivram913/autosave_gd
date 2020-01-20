@@ -34,6 +34,8 @@ This tool was designed to run on **Xubuntu 18.04** but can run on other system a
 - `Name`=`Backup`, `Command`=`autosave_gd.sh --gui --add %F`
 - `Name`=`Untrack`, `Command`=`autosave_gd.sh --gui --untrack %F`
 
+You can setup a keyboard shortcut to execute `autosave_gd.sh --gui --backup` to trigger a backup.
+
 # Usage
 You can mark files with `--add` to be backuped.
 
