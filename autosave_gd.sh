@@ -164,7 +164,7 @@ add()
 			
 			# Add the entry to index file and set an emblem to the file visible in Thunar
 			AS_ENTRIES["$fic"]="$(date +%s)"
-			if $USE_EMBLEM && gio set "$fic" -t stringv metadata::emblems go-up
+			$USE_EMBLEM && gio set "$fic" -t stringv metadata::emblems go-up
 		else
 			echo "$fic doesn't exist ! Skipping..." >&2
 			continue
@@ -314,7 +314,7 @@ untrack()
 		# Remove file from the index and unset its emblem visible in Thunar
 		# But doesn't remove its incremental tracking file for future re-add
 		unset AS_ENTRIES["$fic"]
-		if $USE_EMBLEM && gio set "$fic" -t unset metadata::emblems
+		$USE_EMBLEM && gio set "$fic" -t unset metadata::emblems
 	done
 	
 	if $GUI
