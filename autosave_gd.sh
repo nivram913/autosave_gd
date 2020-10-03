@@ -7,8 +7,9 @@ AS_HOOKS_DIR="$AS_DIR/hooks/" # Directory containing hook scripts to be executed
 AS_LAST_BACKUP="$AS_DIR/last_backup" # File containing the date of last successful backup
 AS_PASS='' # Password for symetric encryption (AES-256-CBC in use) / if empty, prompt at execution
 PBKDF_ITER='100000' # PBKDF2 iteration count (default: 100000, higher = stronger)
-REMOTE_DIR="autosave_p6705fr" # Directory on Google Drive holding backups
-host="p6705fr" # Name of the current host
+host="" # Name of the current host
+REMOTE_DIR="autosave_$host" # Directory on Google Drive holding backups
+USE_EMBLEM=true # Add emblem on backuped files in file explorer
 
 # do NOT edit this
 date="$(date +%Y%m%d%H%M)" # Current date and time to sort backups (do NOT edit this)
@@ -163,7 +164,7 @@ add()
 			
 			# Add the entry to index file and set an emblem to the file visible in Thunar
 			AS_ENTRIES["$fic"]="$(date +%s)"
-			gio set "$fic" -t stringv metadata::emblems go-up
+			if $USE_EMBLEM && gio set "$fic" -t stringv metadata::emblems go-up
 		else
 			echo "$fic doesn't exist ! Skipping..." >&2
 			continue
@@ -313,7 +314,7 @@ untrack()
 		# Remove file from the index and unset its emblem visible in Thunar
 		# But doesn't remove its incremental tracking file for future re-add
 		unset AS_ENTRIES["$fic"]
-		gio set "$fic" -t unset metadata::emblems
+		if $USE_EMBLEM && gio set "$fic" -t unset metadata::emblems
 	done
 	
 	if $GUI
